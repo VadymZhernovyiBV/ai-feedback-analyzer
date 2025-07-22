@@ -1,118 +1,123 @@
-# AI Feedback Analyzer - INITIAL.md
+# AI Feedback Analyzer - Initial Project Specification
 
-## FEATURE
+## FEATURE:
+Build a production-ready web application for AI-powered customer feedback analysis with the following specific functionality:
 
-The AI Feedback Analyzer is a web-based platform that automatically analyzes customer feedback using AI/ML to determine emotional tone and categorize feedback. The system consists of:
+### Core Features:
+- **Feedback Analysis System**: Accept text feedback (up to 5000 characters) and analyze it using OpenRouter API to determine:
+  - Sentiment classification (positive/neutral/negative) with confidence scores
+  - Dynamic category classification with AI-generated categories
+  - Processing time tracking and model attribution
 
-**Core Functionality:**
-- Text feedback submission (up to 5000 characters, English-only)
-- AI-powered sentiment analysis (positive/neutral/negative with confidence scores)
-- Dynamic category classification via LLM (e.g., "Product Quality", "Customer Service", "Delivery")
-- Feedback history management with filtering, sorting, and search
-- Tag management system for organizing feedback
-- Analytics dashboard with sentiment distribution and category insights
+- **Web Interface**: React 19 + TypeScript SPA with Material-UI v5 that includes:
+  - Feedback submission form with real-time validation
+  - Instant analysis results display
+  - Feedback history with pagination (20 items per page)
+  - Advanced filtering by sentiment, category, tags, and text search
+  - Analytics dashboard showing sentiment distribution and top categories
+  - Tag management system for organizing feedback entries
+
+- **Backend API**: FastAPI-based REST API with:
+  - POST `/api/feedback/analyze` - Analyze new feedback with AI
+  - GET `/api/feedback` - Retrieve paginated history with filters
+  - GET `/api/feedback/{id}` - Get specific feedback details
+  - PUT `/api/feedback/{id}/tags` - Update feedback tags
+  - DELETE `/api/feedback/{id}` - Delete feedback entry
+  - GET `/api/stats` - Analytics and statistics
+  - Health check endpoint with service status
+
+- **Database**: SQLite for development, PostgreSQL for production with:
+  - Feedback entries table with full analysis results
+  - Proper indexing on created_at, sentiment, and category fields
+  - JSON storage for tags array
+  - Optional analysis logs table for debugging
+
+### Technical Requirements:
 - Anonymous usage (no authentication required)
+- Responsive design for mobile and desktop
+- Error handling with structured responses and fallbacks
+- Rate limiting (100 req/min for analysis, 200 req/min for reads)
+- Free hosting on Vercel (frontend) + Railway/Render (backend)
 
-**Technical Architecture:**
-- **Frontend**: React 19 (vite) + TypeScript, Vite, React Router v6, Redux Toolkit, Material-UI v5
-- **Backend**: Python 3.12+ with FastAPI, SQLAlchemy ORM
-- **AI Service**: OpenRouter API integration (free tier) with fallback to rule-based analysis
-- **Database**: SQLite (development) / PostgreSQL (production)
-- **Hosting**: Vercel (frontend) + Railway/Render (backend) - all free tiers
+## DOCUMENTATION:
 
-**Key Features:**
-- Real-time feedback analysis with confidence scoring
-- Responsive Material-UI interface with light/dark theme support
-- Advanced filtering and pagination for feedback history
-- Analytics with charts showing sentiment trends and category distribution
-- Tag-based organization system
-- Error handling with graceful fallbacks
-- Rate limiting and cost management for AI API usage
+### API Documentation:
+- **OpenRouter API**: https://openrouter.ai/docs
+- **OpenRouter Models**: https://openrouter.ai/models
+- **FastAPI**: https://fastapi.tiangolo.com/
+- **FastAPI Best Practices**: https://fastapi.tiangolo.com/tutorial/best-practices/
 
-## DOCUMENTATION
+### Frontend Libraries:
+- **React 19 + TypeScript**: https://react.dev/learn/typescript
+- **Material-UI v5**: https://mui.com/material-ui/getting-started/
+- **Redux Toolkit**: https://redux-toolkit.js.org/introduction/getting-started
+- **React Hook Form**: https://react-hook-form.com/get-started
+- **Vite**: https://vitejs.dev/guide/
 
-Key documentation sources that will be referenced during development:
+### Backend Libraries:
+- **SQLAlchemy ORM**: https://docs.sqlalchemy.org/en/20/
+- **Pydantic v2**: https://docs.pydantic.dev/latest/
+- **httpx (async HTTP)**: https://www.python-httpx.org/
+- **Alembic Migrations**: https://alembic.sqlalchemy.org/en/latest/
 
-**Framework Documentation:**
-- FastAPI Official Docs: https://fastapi.tiangolo.com/
-- React 18 Documentation: https://react.dev/
-- Material-UI v5 Docs: https://mui.com/material-ui/
-- Redux Toolkit Documentation: https://redux-toolkit.js.org/
-- React Router v6 Guide: https://reactrouter.com/en/main
-- SQLAlchemy 2.0 Documentation: https://docs.sqlalchemy.org/en/20/
+### Hosting Platforms:
+- **Vercel Deployment**: https://vercel.com/docs/frameworks/vite
+- **Railway Python Guide**: https://docs.railway.app/guides/python
+- **Render FastAPI**: https://render.com/docs/deploy-fastapi
 
-**AI Integration:**
-- OpenRouter API Documentation: https://openrouter.ai/docs
-- OpenAI API Reference (for prompt engineering): https://platform.openai.com/docs/api-reference
-- LLM Prompt Engineering Guide: https://www.promptingguide.ai/
+### Database:
+- **PostgreSQL JSON**: https://www.postgresql.org/docs/current/datatype-json.html
+- **SQLite to PostgreSQL Migration**: https://docs.sqlalchemy.org/en/20/core/engines.html
 
-**Deployment & Hosting:**
-- Vercel Documentation: https://vercel.com/docs
-- Railway Documentation: https://docs.railway.app/
-- Render Documentation: https://render.com/docs
-- Docker Best Practices: https://docs.docker.com/develop/dev-best-practices/
+## OTHER CONSIDERATIONS:
 
-**Database & ORM:**
-- PostgreSQL Documentation: https://www.postgresql.org/docs/
-- SQLite Documentation: https://www.sqlite.org/docs.html
-- Alembic Migration Guide: https://alembic.sqlalchemy.org/en/latest/
+### Critical Implementation Details AI Assistants Often Miss:
 
-**Testing & Quality:**
-- Pytest Documentation: https://docs.pytest.org/
-- React Testing Library: https://testing-library.com/docs/react-testing-library/intro/
-- TypeScript Handbook: https://www.typescriptlang.org/docs/
+1. **OpenRouter API Integration**:
+   - Must include `HTTP-Referer` and `X-Title` headers for free tier access
+   - Implement fallback to free models (meta-llama/llama-3.1-8b-instruct:free) when primary model fails
+   - Parse AI responses as JSON - responses must be validated before storage
+   - Temperature should be set to 0.3 for consistent classification results
 
-## OTHER CONSIDERATIONS
+2. **Database Design Gotchas**:
+   - Tags must be stored as JSON TEXT in SQLite but can use JSONB in PostgreSQL
+   - Always use UTC timestamps (TIMESTAMP, not TIMESTAMPTZ)
+   - Sentiment values must be constrained to enum: 'positive', 'neutral', 'negative'
+   - Include analysis_duration_ms and model_used fields for debugging
 
-**Critical Implementation Gotchas:**
+3. **Frontend State Management**:
+   - Use Redux Toolkit with normalized state structure, not Context API
+   - Implement proper loading states for all async operations
+   - Form submission should show instant feedback while analysis processes
+   - Virtual scrolling required for feedback lists over 100 items
 
-1. **CORS Configuration**: Backend must properly configure CORS for Vercel frontend domain. Use environment variable for allowed origins, not hardcoded values.
+4. **Error Handling Requirements**:
+   - All errors must follow consistent format: `{error: "code", message: "text", details: {}}`
+   - Implement exponential backoff for rate-limited requests
+   - Never expose internal error details to frontend
+   - Log all AI service failures with full request/response for debugging
 
-2. **OpenRouter API Rate Limits**: Free tier has strict limits. Implement proper queuing, exponential backoff, and fallback to rule-based analysis when API fails.
+5. **Performance Constraints**:
+   - Frontend bundle size must be under 500KB (gzipped)
+   - API response time target: <2s for analysis, <200ms for reads
+   - Implement response caching for identical feedback texts
+   - Use database connection pooling in production
 
-3. **Environment Variables**: 
-   - Backend needs `OPENROUTER_API_KEY`, `DATABASE_URL`, `CORS_ORIGINS`
-   - Frontend needs `VITE_API_BASE_URL` (note the VITE_ prefix for Vite)
-   - Never commit API keys to version control
+6. **Deployment Specifics**:
+   - Environment variables must be properly configured in both Vercel and Railway
+   - CORS must be configured to allow only the Vercel frontend URL
+   - Database migrations must run automatically on deployment
+   - Health checks must verify both database and AI service connectivity
 
-4. **Database Schema Sync**: Use Alembic migrations for schema changes. SQLite for development, PostgreSQL for production - ensure compatibility.
+7. **Free Tier Limitations**:
+   - Railway free tier sleeps after inactivity - implement wake-up strategy
+   - OpenRouter free tier has rate limits - implement queuing
+   - Monitor usage to stay within free tier limits
+   - Implement data retention policy (e.g., delete entries older than 30 days)
 
-5. **AI Response Parsing**: OpenRouter responses may not always be valid JSON. Implement robust parsing with try/catch and fallback responses.
-
-6. **Free Hosting Limitations**:
-   - Railway/Render free tier sleeps after inactivity - implement health check endpoints
-   - Vercel has 100GB bandwidth limit - optimize bundle size
-   - PostgreSQL free tier has 1GB storage limit - implement data cleanup
-
-7. **Material-UI Theme**: Use consistent theme provider and avoid inline styles. Implement proper responsive breakpoints.
-
-8. **Redux State Management**: Use RTK Query for API calls, avoid manual fetch in components. Implement proper error states and loading indicators.
-
-9. **Form Validation**: Use React Hook Form with Yup schemas. Validate on both frontend and backend. Handle 5000 character limit for feedback text.
-
-10. **Error Boundaries**: Implement React error boundaries to catch component crashes. Log errors for debugging.
-
-**Performance Considerations:**
-- Implement virtual scrolling for large feedback lists
-- Use React.memo for expensive components
-- Debounce search inputs to avoid excessive API calls
-- Cache AI analysis results to avoid duplicate processing
-- Optimize bundle size with code splitting
-
-**Security Considerations:**
-- Sanitize all user inputs on backend
-- Implement rate limiting on all endpoints
-- Use HTTPS in production (automatic with Vercel/Railway)
-- No authentication required, but implement basic input validation
-
-**Common AI Assistant Pitfalls to Avoid:**
-- Don't hardcode API endpoints - use environment variables
-- Don't forget to handle AI API failures gracefully
-- Don't use deprecated Material-UI v4 syntax (use v5)
-- Don't forget to implement proper TypeScript interfaces
-- Don't skip error handling for async operations
-- Don't use class components - use functional components with hooks
-- Don't forget to implement loading states for all async operations
-- Don't hardcode database connection strings
-- Don't forget CORS configuration for cross-origin requests
-- Don't skip input validation on both frontend and backend
+8. **Common Mistakes to Avoid**:
+   - Don't use OpenAI SDK directly - use httpx for OpenRouter compatibility
+   - Don't store sensitive data in feedback text
+   - Don't implement authentication initially - keep it simple
+   - Don't use Server-Side Rendering - static SPA is sufficient
+   - Don't forget to set `stream: false` in OpenRouter requests
