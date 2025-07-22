@@ -28,8 +28,8 @@ A web-based platform for analyzing customer feedback using AI/ML to determine em
 - Responsive web interface
 
 ### Technology Stack
-- **Frontend**: React 18 + TypeScript, Vite, React Router v6, Redux Toolkit, Material-UI v5
-- **Backend**: Python 3.11+ with FastAPI
+- **Frontend**: React 19 + TypeScript, Vite, React Router v6, Redux Toolkit, Material-UI v5
+- **Backend**: Python 3.12+ with FastAPI
 - **AI Service**: OpenRouter API (free tier)
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **Hosting**: Vercel (frontend) + Railway/Render (backend)
