@@ -1,0 +1,1 @@
+# This file has been removed as rate limiting functionality is no longer needed
